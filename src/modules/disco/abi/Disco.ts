@@ -124,16 +124,16 @@ export interface DiscoEventsContext {
 }
 export type DiscoMethodNames =
   | 'new'
-  | 'discoAddress'
-  | 'discos'
-  | 'investors'
-  | 'status'
-  | 'setCoinBase'
-  | 'getDate'
-  | 'newDisco'
   | 'enableDisco'
   | 'finishedDisco'
-  | 'investor';
+  | 'investor'
+  | 'newDisco'
+  | 'setCoinBase'
+  | 'discoAddress'
+  | 'discos'
+  | 'getDate'
+  | 'investors'
+  | 'status';
 export interface DiscosResponse {
   walletAddr: string;
   tokenAddr: string;
@@ -167,51 +167,29 @@ export interface Disco {
   'new'(): MethodReturnContext;
   /**
    * Payable: false
-   * Constant: true
-   * StateMutability: view
+   * Constant: false
+   * StateMutability: nonpayable
    * Type: function
-   * @param parameter0 Type: string, Indexed: false
+   * @param id Type: string, Indexed: false
    */
-  discoAddress(parameter0: string): MethodConstantReturnContext<string>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   * @param parameter0 Type: string, Indexed: false
-   */
-  discos(parameter0: string): MethodConstantReturnContext<DiscosResponse>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   * @param parameter0 Type: string, Indexed: false
-   */
-  investors(parameter0: string): MethodConstantReturnContext<InvestorsResponse>;
-  /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
-   * Type: function
-   * @param parameter0 Type: string, Indexed: false
-   */
-  status(parameter0: string): MethodConstantReturnContext<StatusResponse>;
+  enableDisco(id: string): MethodReturnContext;
   /**
    * Payable: false
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param addr Type: address, Indexed: false
+   * @param id Type: string, Indexed: false
    */
-  setCoinBase(addr: string): MethodReturnContext;
+  finishedDisco(id: string): MethodReturnContext;
   /**
-   * Payable: false
-   * Constant: true
-   * StateMutability: view
+   * Payable: true
+   * Constant: false
+   * StateMutability: payable
    * Type: function
+   * @param id Type: string, Indexed: false
+   * @param time Type: uint256, Indexed: false
    */
-  getDate(): MethodConstantReturnContext<string>;
+  investor(id: string, time: string): MethodPayableReturnContext;
   /**
    * Payable: true
    * Constant: false
@@ -249,24 +227,46 @@ export interface Disco {
    * Constant: false
    * StateMutability: nonpayable
    * Type: function
-   * @param id Type: string, Indexed: false
+   * @param addr Type: address, Indexed: false
    */
-  enableDisco(id: string): MethodReturnContext;
+  setCoinBase(addr: string): MethodReturnContext;
   /**
    * Payable: false
-   * Constant: false
-   * StateMutability: nonpayable
+   * Constant: true
+   * StateMutability: view
    * Type: function
-   * @param id Type: string, Indexed: false
+   * @param parameter0 Type: string, Indexed: false
    */
-  finishedDisco(id: string): MethodReturnContext;
+  discoAddress(parameter0: string): MethodConstantReturnContext<string>;
   /**
-   * Payable: true
-   * Constant: false
-   * StateMutability: payable
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
    * Type: function
-   * @param id Type: string, Indexed: false
-   * @param time Type: uint256, Indexed: false
+   * @param parameter0 Type: string, Indexed: false
    */
-  investor(id: string, time: string): MethodPayableReturnContext;
+  discos(parameter0: string): MethodConstantReturnContext<DiscosResponse>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   */
+  getDate(): MethodConstantReturnContext<string>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param parameter0 Type: string, Indexed: false
+   */
+  investors(parameter0: string): MethodConstantReturnContext<InvestorsResponse>;
+  /**
+   * Payable: false
+   * Constant: true
+   * StateMutability: view
+   * Type: function
+   * @param parameter0 Type: string, Indexed: false
+   */
+  status(parameter0: string): MethodConstantReturnContext<StatusResponse>;
 }
