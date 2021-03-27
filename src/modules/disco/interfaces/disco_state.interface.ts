@@ -7,7 +7,9 @@ export enum DiscoState {
   CREATED = 1,
   // 创建失败
   CREATE_FAILED = 2,
-  // 开启中
+  /**
+   * @deprecated 开启中（实际没有使用）
+   */
   ENABLING = 3,
   // 等待募资开始（数据库为4，时间未开始）
   ENABLED = 4,

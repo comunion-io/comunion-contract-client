@@ -157,8 +157,8 @@ export class DiscoService {
       console.error(`[handleEnabledDiscoEvent] disco not found`);
       return;
     }
-    if (disco.state !== DiscoState.ENABLING) {
-      console.error(`[handleEnabledDiscoEvent] disco state must be "ENABLING"`);
+    if (disco.state !== DiscoState.CREATED) {
+      console.error(`[handleEnabledDiscoEvent] disco state must be "CREATED"`);
       return;
     }
 
