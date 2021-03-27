@@ -1,17 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as Web3 from 'web3';
-import { Eth } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
-import { ContractContext as DiscoContractContext } from './abi/Disco';
-import { EventData } from 'ethereum-abi-types-generator';
-import DiscoAbi = require('./abi/Disco.abi.json');
+import {
+  createdDisco,
+  Disco as DiscoContractContext,
+  enabledDisco,
+  fundraisingFailed,
+  fundraisingSucceed,
+  investToDisco,
+} from '../../../types/web3-v1-contracts/Disco';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Disco } from './entities/disco.entity';
 import { DiscoInvestor } from './entities/disco_investor.entity';
 import { Repository } from 'typeorm';
 import { DiscoState } from './interfaces/disco_state.interface';
-
+import Web3 = require('web3');
+import discoAbi = require('../../../abis/Disco.json');
 @Injectable()
 export class DiscoService {
   constructor(
@@ -21,8 +25,6 @@ export class DiscoService {
     @InjectRepository(DiscoInvestor)
     private readonly discoInvestorRepository: Repository<DiscoInvestor>,
   ) {}
-
-  private ethClient: Eth;
 
   private discoContract: DiscoContractContext;
 
@@ -39,7 +41,8 @@ export class DiscoService {
     const discoContractAddress = this.configServise.get<string>(
       'DISCO_CONTRACT_ADDRESS',
     );
-    this.ethClient = new (Web3 as any)(
+
+    const web3 = new (Web3 as any)(
       new (Web3 as any).providers.WebsocketProvider(wsEndPoint, {
         clientConfig: {
           // Useful to keep a connection alive
@@ -54,11 +57,12 @@ export class DiscoService {
           onTimeout: false,
         },
       }),
-    ).eth;
-    this.discoContract = (new this.ethClient.Contract(
-      DiscoAbi as AbiItem[],
+    ) as Web3.default;
+
+    this.discoContract = (new web3.eth.Contract(
+      discoAbi as AbiItem[],
       discoContractAddress,
-    ) as unknown) as DiscoContractContext;
+    ) as any) as DiscoContractContext;
   }
 
   // 订阅DISCO合约
@@ -74,12 +78,12 @@ export class DiscoService {
       });
 
     this.discoContract.events
-      .enabeldDisco({})
+      .enabledDisco({})
       .on('data', (data) => {
-        this.handleEnabeldDiscoEvent(data);
+        this.handleEnabledDiscoEvent(data);
       })
       .on('error', (error) => {
-        console.log(`[SubscribtionEnabeldDisco] error`);
+        console.log(`[SubscribtionEnabledDisco] error`);
         console.error(error);
       });
 
@@ -94,9 +98,9 @@ export class DiscoService {
       });
 
     this.discoContract.events
-      .fundraisingSuccessed({})
+      .fundraisingSucceed({})
       .on('data', (data) => {
-        this.handleFundraisingSuccessedEvent(data);
+        this.handleFundraisingSucceedEvent(data);
       })
       .on('error', (error) => {
         console.log(`[SubscribtionFundraisingSuccessed] error`);
@@ -123,7 +127,7 @@ export class DiscoService {
   }
 
   // 处理创建DISCO事件
-  private async handleCreatedDiscoEvent(data: EventData): Promise<void> {
+  private async handleCreatedDiscoEvent(data: createdDisco): Promise<void> {
     console.log(`${JSON.stringify(data)}`);
     const discoId = data.returnValues.discoId;
     const disco = await this.getDiscoById(discoId);
@@ -144,17 +148,17 @@ export class DiscoService {
   }
 
   // 处理打开DISCO事件
-  private async handleEnabeldDiscoEvent(data: EventData): Promise<void> {
+  private async handleEnabledDiscoEvent(data: enabledDisco): Promise<void> {
     console.log(`${JSON.stringify(data)}`);
     const discoId = data.returnValues.discoId;
     const disco = await this.getDiscoById(discoId);
 
     if (!disco) {
-      console.error(`[handleEnabeldDiscoEvent] disco not found`);
+      console.error(`[handleEnabledDiscoEvent] disco not found`);
       return;
     }
     if (disco.state !== DiscoState.ENABLING) {
-      console.error(`[handleEnabeldDiscoEvent] disco state must be "ENABLING"`);
+      console.error(`[handleEnabledDiscoEvent] disco state must be "ENABLING"`);
       return;
     }
 
@@ -164,7 +168,9 @@ export class DiscoService {
   }
 
   // 处理DISCO募资失败事件
-  private async handleFundraisingFailedEvent(data: EventData): Promise<void> {
+  private async handleFundraisingFailedEvent(
+    data: fundraisingFailed,
+  ): Promise<void> {
     console.log(`${JSON.stringify(data)}`);
     const discoId = data.returnValues.discoId;
     const disco = await this.getDiscoById(discoId);
@@ -186,8 +192,8 @@ export class DiscoService {
   }
 
   // 处理DISCO募资成功事件
-  private async handleFundraisingSuccessedEvent(
-    data: EventData,
+  private async handleFundraisingSucceedEvent(
+    data: fundraisingSucceed,
   ): Promise<void> {
     console.log(`${JSON.stringify(data)}`);
     const discoId = data.returnValues.discoId;
@@ -210,7 +216,7 @@ export class DiscoService {
   }
 
   // 处理投资事件
-  private async handleInvestToDiscoEvent(data: EventData): Promise<void> {
+  private async handleInvestToDiscoEvent(data: investToDisco): Promise<void> {
     console.log(`${JSON.stringify(data)}`);
   }
 }

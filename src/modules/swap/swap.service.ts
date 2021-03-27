@@ -3,11 +3,19 @@ import { ConfigService } from '@nestjs/config';
 import * as Web3 from 'web3';
 import { Eth } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
-import { ContractContext as SwapFactoryContractContext } from './abi/SwapFactory';
-import { ContractContext as SwapPairContractContext } from './abi/SwapPair';
-import SwapFactoryAbi = require('./abi/SwapFactory.abi.json');
-import SwapPairAbi = require('./abi/SwapPair.abi.json');
-import { EventData } from 'ethereum-abi-types-generator';
+import {
+  PairCreated,
+  SwapFactory as SwapFactoryContractContext,
+} from '../../../types/web3-v1-contracts/SwapFactory';
+import {
+  Burn,
+  Mint,
+  Swap,
+  SwapPair as SwapPairContractContext,
+  Sync,
+} from '../../../types/web3-v1-contracts/SwapPair';
+import SwapFactoryAbi = require('../../../abis/SwapFactory.json');
+import SwapPairAbi = require('../../../abis/SwapPair.json');
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transaction } from './entities/transaction.entity';
@@ -113,24 +121,24 @@ export class SwapService {
   }
 
   private async handleSwapFactoryPairCreatedEvent(
-    data: EventData,
+    data: PairCreated,
   ): Promise<void> {
     console.log('handleSwapFactoryPairCreatedEvent', data);
   }
 
-  private async handleSwapPairSwapEvent(data: EventData): Promise<void> {
+  private async handleSwapPairSwapEvent(data: Swap): Promise<void> {
     console.log('handleSwapPairSwapEvent', data);
   }
 
-  private async handleSwapPairSyncEvent(data: EventData): Promise<void> {
+  private async handleSwapPairSyncEvent(data: Sync): Promise<void> {
     console.log('handleSwapPairSyncEvent', data);
   }
 
-  private async handleSwapPairMintEvent(data: EventData): Promise<void> {
+  private async handleSwapPairMintEvent(data: Mint): Promise<void> {
     console.log('handleSwapPairMintEvent', data);
   }
 
-  private async handleSwapPairBurnEvent(data: EventData) {
+  private async handleSwapPairBurnEvent(data: Burn) {
     console.log('handleSwapPairBurnEvent', data);
   }
 }
