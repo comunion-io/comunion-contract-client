@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AbiItem } from 'web3-utils';
+import { strict as assert } from 'assert';
 import {
   createdDisco,
   Disco as DiscoContractContext,
@@ -16,6 +17,7 @@ import { Repository } from 'typeorm';
 import { DiscoState } from './interfaces/disco_state.interface';
 import Web3 = require('web3');
 import discoAbi = require('../../../abis/Disco.json');
+import { UserService } from '../user/user.service';
 @Injectable()
 export class DiscoService {
   constructor(
@@ -24,6 +26,7 @@ export class DiscoService {
     private readonly discoRepository: Repository<Disco>,
     @InjectRepository(DiscoInvestor)
     private readonly discoInvestorRepository: Repository<DiscoInvestor>,
+    private readonly userService: UserService,
   ) {}
 
   private discoContract: DiscoContractContext;
@@ -218,5 +221,16 @@ export class DiscoService {
   // 处理投资事件
   private async handleInvestToDiscoEvent(data: investToDisco): Promise<void> {
     console.log(`${JSON.stringify(data)}`);
+    const uid = await this.userService.getUidByWalletAddress(
+      data.returnValues.investorAddr.toLowerCase(),
+    );
+    assert(uid, '[handleInvestToDiscoEvent] wallet address not found');
+    await this.discoInvestorRepository.save(
+      this.discoInvestorRepository.create({
+        uid,
+        discoId: data.returnValues.discoId,
+        ethCount: Number(data.returnValues.amount),
+      }),
+    );
   }
 }
