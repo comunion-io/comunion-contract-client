@@ -17,4 +17,6 @@ export enum DiscoState {
   FUNDRAISING_SUCCESS = 5,
   // 募资失败
   FUNDRAISING_FAIED = 6,
+  // 募资结束
+  FUNDRAISING_FINISHED = 8,
 }

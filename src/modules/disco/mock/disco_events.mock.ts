@@ -55,3 +55,59 @@ export const DiscoEventsInvestToDisco = {
     ],
   },
 };
+
+export const DiscoEventEnabledDisco = {
+  address: '0xa9b5923cAd611Ef3DA0576F5C92F2d915e00E4F8',
+  blockHash:
+    '0x2e80faef772c63d8e93c998fd4faf41f82ecfde64fdf3ce8b9f6cf5dc13fb9c7',
+  blockNumber: 4835517,
+  logIndex: 11,
+  removed: false,
+  transactionHash:
+    '0xf8dbe0fe3b127dc74ffe5a23323307a3c4c223f43be873a45caf861538ffc133',
+  transactionIndex: 6,
+  id: 'log_c5b2dc4e',
+  returnValues: {
+    '0': 'd1',
+    discoId: 'd1',
+  },
+  event: 'enabledDisco',
+  signature:
+    '0x44ec18e6fb6c9893aa22a7236add99d912e21075f568b1f65c6b3d7a65e285d8',
+  raw: {
+    data:
+      '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000026431000000000000000000000000000000000000000000000000000000000000',
+    topics: [
+      '0x44ec18e6fb6c9893aa22a7236add99d912e21075f568b1f65c6b3d7a65e285d8',
+    ],
+  },
+};
+
+export const DiscoEventundraisingFinished = {
+  address: '0xa9b5923cAd611Ef3DA0576F5C92F2d915e00E4F8',
+  blockHash:
+    '0x975704f588a957303ecca964fce6e2fd55f903e933ce1d569abc691b564ca195',
+  blockNumber: 4836604,
+  logIndex: 26,
+  removed: false,
+  transactionHash:
+    '0x7b247c68cc02bbf4d2770ca5c8ce0424caa6e9a34a770f041f0495272103bfb3',
+  transactionIndex: 15,
+  id: 'log_9b8ee767',
+  returnValues: {
+    '0': 'd1',
+    '1': true,
+    discoIdo: 'd1',
+    success: true,
+  },
+  event: 'fundraisingFinished',
+  signature:
+    '0x35714766e4544afd4526bc1bbe6a503c6b0f871ab72fb6939be49b8e3419e89e',
+  raw: {
+    data:
+      '0x0000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000026431000000000000000000000000000000000000000000000000000000000000',
+    topics: [
+      '0x35714766e4544afd4526bc1bbe6a503c6b0f871ab72fb6939be49b8e3419e89e',
+    ],
+  },
+};

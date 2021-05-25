@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from 'nest-schedule';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { DiscoModule } from './modules/disco/disco.module';
 import { SwapModule } from './modules/swap/swap.module';
+import { ScheduleService } from './schedule.service';
 
 const ENV = process.env.NODE_ENV;
 
@@ -13,6 +15,7 @@ const ENV = process.env.NODE_ENV;
       isGlobal: true,
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
     }),
+    ScheduleModule.register(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -33,5 +36,14 @@ const ENV = process.env.NODE_ENV;
     DiscoModule,
     SwapModule,
   ],
+  providers: [ScheduleService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private readonly scheduleService: ScheduleService) {}
+
+  async onApplicationBootstrap() {
+    if (['production', 'test', undefined].includes(process.env.NODE_ENV)) {
+      this.scheduleService.startEthCronJob();
+    }
+  }
+}

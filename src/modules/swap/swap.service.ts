@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as Web3 from 'web3';
-import { Eth } from 'web3-eth';
 import { AbiItem } from 'web3-utils';
 import {
   PairCreated,
@@ -19,6 +17,7 @@ import SwapPairAbi = require('../../../abis/SwapPair.json');
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transaction } from './entities/transaction.entity';
+import { Web3Service } from '../web3/web3.service';
 
 @Injectable()
 export class SwapService {
@@ -26,9 +25,8 @@ export class SwapService {
     private readonly configServise: ConfigService,
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
+    private readonly web3Service: Web3Service,
   ) {}
-
-  private ethClient: Eth;
 
   private swapFactoryContract: SwapFactoryContractContext;
 
@@ -49,30 +47,14 @@ export class SwapService {
 
   // 初始化
   private init() {
-    const wsEndPoint = this.configServise.get<string>('INFURA_ENDPOINT_WS');
     const swapFactoryContractAddress = this.configServise.get<string>(
       'SWAP_FACTORY_CONTRACT_ADDRESS',
     );
-    this.ethClient = new (Web3 as any)(
-      new (Web3 as any).providers.WebsocketProvider(wsEndPoint, {
-        clientConfig: {
-          // Useful to keep a connection alive
-          keepalive: true,
-          keepaliveInterval: 60000, // ms
-        },
-        // Enable auto reconnection
-        reconnect: {
-          auto: true,
-          delay: 5000, // ms
-          maxAttempts: 5,
-          onTimeout: false,
-        },
-      }),
-    ).eth;
-    this.swapFactoryContract = (new this.ethClient.Contract(
+
+    this.swapFactoryContract = this.web3Service.generateContractClient<SwapFactoryContractContext>(
       SwapFactoryAbi as AbiItem[],
       swapFactoryContractAddress,
-    ) as unknown) as SwapFactoryContractContext;
+    );
   }
 
   private async subscribeSwapFactoryContract() {
@@ -100,11 +82,11 @@ export class SwapService {
 
   private async subscribeSwapPairContracts(addresses: string[]): Promise<void> {
     for (const address of addresses) {
-      const swapPairContract = (new this.ethClient.Contract(
+      const swapPairContract = this.web3Service.generateContractClient<SwapPairContractContext>(
         SwapPairAbi as AbiItem[],
         // 主网Uniswap合约：0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc
         address,
-      ) as unknown) as SwapPairContractContext;
+      );
       swapPairContract.events.Swap({}).on('data', (data) => {
         this.handleSwapPairSwapEvent(data);
       });

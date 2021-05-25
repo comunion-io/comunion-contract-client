@@ -7,17 +7,19 @@ import {
   Disco as DiscoContractContext,
   enabledDisco,
   fundraisingFailed,
+  fundraisingFinished,
   fundraisingSucceed,
   investToDisco,
 } from '../../../types/web3-v1-contracts/Disco';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Disco } from './entities/disco.entity';
 import { DiscoInvestor } from './entities/disco_investor.entity';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 import { DiscoState } from './interfaces/disco_state.interface';
-import Web3 = require('web3');
 import discoAbi = require('../../../abis/Disco.json');
 import { UserService } from '../user/user.service';
+import { Web3Service } from '../web3/web3.service';
+
 @Injectable()
 export class DiscoService {
   constructor(
@@ -27,9 +29,14 @@ export class DiscoService {
     @InjectRepository(DiscoInvestor)
     private readonly discoInvestorRepository: Repository<DiscoInvestor>,
     private readonly userService: UserService,
+    private readonly web3Service: Web3Service,
   ) {}
 
   private discoContract: DiscoContractContext;
+
+  private discoContractAddress = this.configServise.get<string>(
+    'DISCO_CONTRACT_ADDRESS',
+  );
 
   async onModuleInit() {
     this.init();
@@ -40,32 +47,26 @@ export class DiscoService {
 
   // 初始化
   private init() {
-    const wsEndPoint = this.configServise.get<string>('INFURA_ENDPOINT_WS');
-    const discoContractAddress = this.configServise.get<string>(
-      'DISCO_CONTRACT_ADDRESS',
-    );
-
-    const web3 = new (Web3 as any)(
-      new (Web3 as any).providers.WebsocketProvider(wsEndPoint, {
-        clientConfig: {
-          // Useful to keep a connection alive
-          keepalive: true,
-          keepaliveInterval: 60000, // ms
-        },
-        // Enable auto reconnection
-        reconnect: {
-          auto: true,
-          delay: 5000, // ms
-          maxAttempts: 5,
-          onTimeout: false,
-        },
-      }),
-    ) as Web3.default;
-
-    this.discoContract = (new web3.eth.Contract(
+    this.discoContract = this.web3Service.generateContractClient<DiscoContractContext>(
       discoAbi as AbiItem[],
-      discoContractAddress,
-    ) as any) as DiscoContractContext;
+      this.discoContractAddress,
+    );
+  }
+
+  // 获取合约历史事件
+  private getHistoryEvents(
+    eventName?:
+      | 'createdDisco'
+      | 'enabledDisco'
+      | 'fundraisingFinished'
+      | 'fundraisingFailed'
+      | 'fundraisingSucceed'
+      | 'investToDisco',
+  ) {
+    return this.discoContract.getPastEvents(eventName ?? 'allEvents', {
+      fromBlock: 0,
+      toBlock: 'latest',
+    });
   }
 
   // 订阅DISCO合约
@@ -87,6 +88,16 @@ export class DiscoService {
       })
       .on('error', (error) => {
         console.log(`[SubscribtionEnabledDisco] error`);
+        console.error(error);
+      });
+
+    this.discoContract.events
+      .fundraisingFinished({})
+      .on('data', (data) => {
+        this.handleFundraisingFinishedEvent(data);
+      })
+      .on('error', (error) => {
+        console.log(`[SubscribtionFundraisingFailed] error`);
         console.error(error);
       });
 
@@ -170,6 +181,28 @@ export class DiscoService {
     await this.discoRepository.save(disco);
   }
 
+  // 处理DISCO募资结束事件
+  private async handleFundraisingFinishedEvent(
+    data: fundraisingFinished,
+  ): Promise<void> {
+    console.log(`${JSON.stringify(data)}`);
+    const discoId = data.returnValues.discoIdo;
+    const disco = await this.getDiscoById(discoId);
+
+    if (!disco) {
+      console.error(`[handleEnabledDiscoEvent] disco not found`);
+      return;
+    }
+    if (disco.state !== DiscoState.ENABLED) {
+      console.error(`[handleEnabledDiscoEvent] disco state must be "CREATED"`);
+      return;
+    }
+
+    disco.state = DiscoState.FUNDRAISING_FINISHED;
+    disco.updatedAt = new Date();
+    await this.discoRepository.save(disco);
+  }
+
   // 处理DISCO募资失败事件
   private async handleFundraisingFailedEvent(
     data: fundraisingFailed,
@@ -182,9 +215,12 @@ export class DiscoService {
       console.error(`[handleFundraisingFailedEvent] disco not found`);
       return;
     }
-    if (disco.state !== DiscoState.ENABLED) {
+    if (
+      disco.state !== DiscoState.ENABLED &&
+      disco.state !== DiscoState.FUNDRAISING_FINISHED
+    ) {
       console.error(
-        `[handleFundraisingFailedEvent] disco state must be "ENABLED"`,
+        `[handleFundraisingFailedEvent] disco state must be "ENABLED" or "FUNDRAISING_FINISHED"`,
       );
       return;
     }
@@ -206,9 +242,12 @@ export class DiscoService {
       console.error(`[handleFundraisingSuccessedEvent] disco not found`);
       return;
     }
-    if (disco.state !== DiscoState.ENABLED) {
+    if (
+      disco.state !== DiscoState.ENABLED &&
+      disco.state !== DiscoState.FUNDRAISING_FINISHED
+    ) {
       console.error(
-        `[handleFundraisingSuccessedEvent] disco state must be "ENABLED"`,
+        `[handleFundraisingSuccessedEvent] disco state must be "ENABLED" or "FUNDRAISING_FINISHED"`,
       );
       return;
     }
@@ -231,6 +270,56 @@ export class DiscoService {
         discoId: data.returnValues.discoId,
         ethCount: Number(data.returnValues.amount),
       }),
+    );
+  }
+
+  public async getDate(): Promise<string | undefined> {
+    return this.discoContract
+      ? this.discoContract.methods.getDate().call()
+      : undefined;
+  }
+
+  private async finishDisco(
+    id: string,
+    nonceInput?: number,
+    gasInput?: number,
+  ): Promise<void> {
+    let nonce: number;
+    let gas: number;
+    try {
+      const from = this.discoContract.defaultAccount;
+      nonce =
+        nonceInput ??
+        (await this.web3Service.client.eth.getTransactionCount(from));
+
+      gas =
+        gasInput ??
+        (await this.discoContract.methods.finishedDisco(id).estimateGas());
+
+      await this.discoContract.methods.finishedDisco(id).send({
+        from,
+        gas,
+        nonce,
+      });
+      console.log(`[FinishDisco] transcation sent, nonce ${nonce}, gas ${gas}`);
+    } catch (error) {
+      console.error(`[FinishDisco] error ${id}: ${error.message}`);
+      if (error.message === 'Returned error: nonce too low') {
+        this.finishDisco(id, nonce + 1, gas);
+      }
+    }
+  }
+
+  public async finishDiscos() {
+    const finishRequiredDiscos = await this.discoRepository.find({
+      select: ['id'],
+      where: {
+        state: DiscoState.ENABLED,
+        fundRaisingEndedAt: LessThanOrEqual(new Date()),
+      },
+    });
+    await Promise.all(
+      finishRequiredDiscos.map(({ id }) => this.finishDisco(id)),
     );
   }
 }
