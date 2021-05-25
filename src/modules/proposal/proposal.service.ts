@@ -74,13 +74,13 @@ export class ProposalService {
       duration: Math.round(Number(data.returnValues.proposal[9][2]) / 24),
       // TODO 合约必有？
       hasPayment: true,
-      // 合约没返
+      // TODO 合约没返
       paymentAddr: data.returnValues.proposal[7][0],
       paymentType: Number(data.returnValues.proposal[7][1]) === 1 ? 1 : 2,
       paymentMonths: Number(data.returnValues.proposal[7][2]),
       // TODO 格式不确定。。。
       paymentDate: data.returnValues.proposal[7][3],
-      // 合约没有
+      // TODO 合约没有
       paymentAmount: Number(data.returnValues.proposal[7][5]),
       totalPaymentAmount: Number(data.returnValues.proposal[7][5]),
       terms: data.returnValues.paymentDetails.map((term) => ({
