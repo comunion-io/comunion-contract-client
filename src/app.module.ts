@@ -42,7 +42,7 @@ export class AppModule {
   constructor(private readonly scheduleService: ScheduleService) {}
 
   async onApplicationBootstrap() {
-    if (['production', 'test', undefined].includes(process.env.NODE_ENV)) {
+    if (['production', 'test'].includes(process.env.NODE_ENV)) {
       this.scheduleService.startEthCronJob();
     }
   }

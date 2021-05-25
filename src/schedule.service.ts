@@ -15,6 +15,7 @@ export class ScheduleService {
       try {
         // keep web3 websocket connection
         await this.discoService.getDate();
+        console.log('[EthCronJob] Ping Contract');
       } catch (error) {
         console.error('[EthCronJob] Keep WS connection failed');
       }
