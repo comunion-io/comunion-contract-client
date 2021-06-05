@@ -7,7 +7,6 @@ export interface IProposal {
   status: number;
   title: string;
   type: number;
-  userId: string;
   contact: string;
   description: string;
   voterType: number;

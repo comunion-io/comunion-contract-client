@@ -63,8 +63,6 @@ export class ProposalService {
       status: parseInt(data.returnValues.proposal[3], 10),
       title: data.returnValues.proposal[2],
       type: parseInt(data.returnValues.proposal[4], 10) + 1,
-      // TODO 这个应该是后端去查
-      userId: '1',
       contact: data.returnValues.proposal[5],
       description: data.returnValues.proposal[6],
       voterType: Number(data.returnValues.proposal[8][0]),
