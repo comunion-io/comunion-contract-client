@@ -133,8 +133,6 @@ export interface Disco extends BaseContract {
       2: boolean;
     }>;
 
-    setCoinBase(addr: string): NonPayableTransactionObject<void>;
-
     setSwap(swapAddr: string): NonPayableTransactionObject<void>;
 
     setPreFee(pf: number | string | BN): NonPayableTransactionObject<void>;
@@ -159,6 +157,12 @@ export interface Disco extends BaseContract {
     ): PayableTransactionObject<void>;
 
     enableDisco(id: string): PayableTransactionObject<void>;
+
+    discoToken(id: string): NonPayableTransactionObject<string>;
+
+    poolEthBalance(id: string): NonPayableTransactionObject<string>;
+
+    poolTokenBalance(id: string): NonPayableTransactionObject<string>;
 
     finishedDisco(id: string): NonPayableTransactionObject<void>;
 
@@ -185,24 +189,6 @@ export interface Disco extends BaseContract {
     assignToken(id: string): PayableTransactionObject<string>;
 
     assignLiquidity(id: string): PayableTransactionObject<void>;
-
-    addLiquidity(
-      id: string,
-      eth: number | string | BN,
-      token: number | string | BN
-    ): PayableTransactionObject<{
-      0: string;
-      1: string;
-      2: string;
-    }>;
-
-    removeLiquidity(
-      id: string,
-      token: number | string | BN
-    ): PayableTransactionObject<{
-      0: string;
-      1: string;
-    }>;
 
     refund(id: string): PayableTransactionObject<void>;
 

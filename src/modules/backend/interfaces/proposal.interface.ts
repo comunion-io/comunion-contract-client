@@ -1,4 +1,5 @@
 export interface IProposal {
+  id: string;
   txId: string;
   startupId: string;
   walletAddr: string;

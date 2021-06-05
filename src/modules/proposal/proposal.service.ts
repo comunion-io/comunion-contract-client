@@ -54,7 +54,7 @@ export class ProposalService {
   private async handleProposalAcceptedEvent(data: accepted): Promise<void> {
     console.log(`${JSON.stringify(data)}`);
     await this.backendService.createProposal({
-      // TODO 少一个 ID
+      id: data.returnValues.proposal[1],
       txId: data.transactionHash,
       startupId: data.returnValues.proposal[0],
       walletAddr: data.returnValues.proposal[7][0],
@@ -63,26 +63,23 @@ export class ProposalService {
       status: parseInt(data.returnValues.proposal[3], 10),
       title: data.returnValues.proposal[2],
       type: parseInt(data.returnValues.proposal[4], 10) + 1,
-      // TODO 系统还没有
+      // TODO 这个应该是后端去查
       userId: '1',
-      // TODO 系统还没有
       contact: data.returnValues.proposal[5],
       description: data.returnValues.proposal[6],
       voterType: Number(data.returnValues.proposal[8][0]),
       supporters: Number(data.returnValues.proposal[9][0]),
       minApprovalPercent: Number(data.returnValues.proposal[9][1]),
       duration: Math.round(Number(data.returnValues.proposal[9][2]) / 24),
-      // TODO 合约必有？
-      hasPayment: true,
-      // TODO 合约没返
-      paymentAddr: data.returnValues.proposal[7][0],
+      // 总支付金额大于 0 是有支付
+      hasPayment: Number(data.returnValues.proposal[7][5]) > 0,
+      paymentAddr: data.returnValues.proposal[11],
       paymentType: Number(data.returnValues.proposal[7][1]) === 1 ? 1 : 2,
       paymentMonths: Number(data.returnValues.proposal[7][2]),
       // TODO 格式不确定。。。
       paymentDate: data.returnValues.proposal[7][3],
-      // TODO 合约没有
       paymentAmount: Number(data.returnValues.proposal[7][5]),
-      totalPaymentAmount: Number(data.returnValues.proposal[7][5]),
+      totalPaymentAmount: Number(data.returnValues.proposal[7][6]),
       terms: data.returnValues.paymentDetails.map((term) => ({
         amount: Number(term[1]),
         content: term[2],

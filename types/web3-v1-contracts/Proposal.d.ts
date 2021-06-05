@@ -31,9 +31,10 @@ export type accepted = ContractEventLog<{
     string,
     string,
     string,
-    [string, string, string, string, string, string, string],
+    [string, string, string, string, string, string, string, string],
     [string],
     [string, string, string, string],
+    string,
     string
   ];
   paymentDetails: [string, string, string][];
@@ -46,9 +47,10 @@ export type accepted = ContractEventLog<{
     string,
     string,
     string,
-    [string, string, string, string, string, string, string],
+    [string, string, string, string, string, string, string, string],
     [string],
     [string, string, string, string],
+    string,
     string
   ];
   2: [string, string, string][];
@@ -90,8 +92,9 @@ export interface Proposal extends BaseContract {
           number | string | BN,
           number | string | BN,
           string,
-          string,
           number | string | BN,
+          number | string | BN,
+          string,
           string
         ],
         [number | string | BN],
@@ -101,7 +104,8 @@ export interface Proposal extends BaseContract {
           number | string | BN,
           number | string | BN
         ],
-        number | string | BN
+        number | string | BN,
+        string
       ],
       paymentDetails: [number | string | BN, number | string | BN, string][]
     ): PayableTransactionObject<
@@ -113,9 +117,10 @@ export interface Proposal extends BaseContract {
         string,
         string,
         string,
-        [string, string, string, string, string, string, string],
+        [string, string, string, string, string, string, string, string],
         [string],
         [string, string, string, string],
+        string,
         string
       ]
     >;
@@ -133,9 +138,10 @@ export interface Proposal extends BaseContract {
         string,
         string,
         string,
-        [string, string, string, string, string, string, string],
+        [string, string, string, string, string, string, string, string],
         [string],
         [string, string, string, string],
+        string,
         string
       ];
       1: [string, string, string][];
@@ -184,8 +190,9 @@ export interface Proposal extends BaseContract {
           number | string | BN,
           number | string | BN,
           string,
-          string,
           number | string | BN,
+          number | string | BN,
+          string,
           string
         ],
         [number | string | BN],
@@ -195,7 +202,8 @@ export interface Proposal extends BaseContract {
           number | string | BN,
           number | string | BN
         ],
-        number | string | BN
+        number | string | BN,
+        string
       ],
       paymentDetails: [number | string | BN, number | string | BN, string][]
     ): NonPayableTransactionObject<
@@ -207,9 +215,10 @@ export interface Proposal extends BaseContract {
         string,
         string,
         string,
-        [string, string, string, string, string, string, string],
+        [string, string, string, string, string, string, string, string],
         [string],
         [string, string, string, string],
+        string,
         string
       ]
     >;

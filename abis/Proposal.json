@@ -85,14 +85,19 @@
                 "type": "string"
               },
               {
-                "internalType": "contract IERC20",
-                "name": "token",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "paymentAmount",
+                "type": "uint256"
               },
               {
                 "internalType": "uint256",
                 "name": "totalAmount",
                 "type": "uint256"
+              },
+              {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
               },
               {
                 "internalType": "contract FundPool",
@@ -147,6 +152,11 @@
             "internalType": "uint256",
             "name": "blockTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "proposer",
+            "type": "address"
           }
         ],
         "indexed": false,
@@ -320,14 +330,19 @@
                 "type": "string"
               },
               {
-                "internalType": "contract IERC20",
-                "name": "token",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "paymentAmount",
+                "type": "uint256"
               },
               {
                 "internalType": "uint256",
                 "name": "totalAmount",
                 "type": "uint256"
+              },
+              {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
               },
               {
                 "internalType": "contract FundPool",
@@ -382,6 +397,11 @@
             "internalType": "uint256",
             "name": "blockTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "proposer",
+            "type": "address"
           }
         ],
         "internalType": "struct Proposal.ProposalDetail",
@@ -473,14 +493,19 @@
                 "type": "string"
               },
               {
-                "internalType": "contract IERC20",
-                "name": "token",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "paymentAmount",
+                "type": "uint256"
               },
               {
                 "internalType": "uint256",
                 "name": "totalAmount",
                 "type": "uint256"
+              },
+              {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
               },
               {
                 "internalType": "contract FundPool",
@@ -535,6 +560,11 @@
             "internalType": "uint256",
             "name": "blockTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "proposer",
+            "type": "address"
           }
         ],
         "internalType": "struct Proposal.ProposalDetail",
@@ -622,14 +652,19 @@
                 "type": "string"
               },
               {
-                "internalType": "contract IERC20",
-                "name": "token",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "paymentAmount",
+                "type": "uint256"
               },
               {
                 "internalType": "uint256",
                 "name": "totalAmount",
                 "type": "uint256"
+              },
+              {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
               },
               {
                 "internalType": "contract FundPool",
@@ -684,6 +719,11 @@
             "internalType": "uint256",
             "name": "blockTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "proposer",
+            "type": "address"
           }
         ],
         "internalType": "struct Proposal.ProposalDetail",
@@ -919,14 +959,19 @@
                 "type": "string"
               },
               {
-                "internalType": "contract IERC20",
-                "name": "token",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "paymentAmount",
+                "type": "uint256"
               },
               {
                 "internalType": "uint256",
                 "name": "totalAmount",
                 "type": "uint256"
+              },
+              {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
               },
               {
                 "internalType": "contract FundPool",
@@ -981,6 +1026,11 @@
             "internalType": "uint256",
             "name": "blockTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "proposer",
+            "type": "address"
           }
         ],
         "internalType": "struct Proposal.ProposalDetail",
@@ -1072,14 +1122,19 @@
                 "type": "string"
               },
               {
-                "internalType": "contract IERC20",
-                "name": "token",
-                "type": "address"
+                "internalType": "uint256",
+                "name": "paymentAmount",
+                "type": "uint256"
               },
               {
                 "internalType": "uint256",
                 "name": "totalAmount",
                 "type": "uint256"
+              },
+              {
+                "internalType": "contract IERC20",
+                "name": "token",
+                "type": "address"
               },
               {
                 "internalType": "contract FundPool",
@@ -1134,6 +1189,11 @@
             "internalType": "uint256",
             "name": "blockTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "proposer",
+            "type": "address"
           }
         ],
         "internalType": "struct Proposal.ProposalDetail",
