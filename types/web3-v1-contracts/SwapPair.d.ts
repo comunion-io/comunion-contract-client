@@ -84,88 +84,25 @@ export interface SwapPair extends BaseContract {
   ): SwapPair;
   clone(): SwapPair;
   methods: {
-    DOMAIN_SEPARATOR(): NonPayableTransactionObject<string>;
+    name(): NonPayableTransactionObject<string>;
 
-    MINIMUM_LIQUIDITY(): NonPayableTransactionObject<string>;
+    symbol(): NonPayableTransactionObject<string>;
 
-    PERMIT_TYPEHASH(): NonPayableTransactionObject<string>;
+    decimals(): NonPayableTransactionObject<string>;
 
-    allowance(arg0: string, arg1: string): NonPayableTransactionObject<string>;
+    totalSupply(): NonPayableTransactionObject<string>;
+
+    balanceOf(owner: string): NonPayableTransactionObject<string>;
+
+    allowance(
+      owner: string,
+      spender: string
+    ): NonPayableTransactionObject<string>;
 
     approve(
       spender: string,
       value: number | string | BN
     ): NonPayableTransactionObject<boolean>;
-
-    balanceOf(arg0: string): NonPayableTransactionObject<string>;
-
-    burn(
-      to: string
-    ): NonPayableTransactionObject<{
-      amount0: string;
-      amount1: string;
-      0: string;
-      1: string;
-    }>;
-
-    decimals(): NonPayableTransactionObject<string>;
-
-    factory(): NonPayableTransactionObject<string>;
-
-    getReserves(): NonPayableTransactionObject<{
-      _reserve0: string;
-      _reserve1: string;
-      _blockTimestampLast: string;
-      0: string;
-      1: string;
-      2: string;
-    }>;
-
-    initialize(
-      _token0: string,
-      _token1: string
-    ): NonPayableTransactionObject<void>;
-
-    kLast(): NonPayableTransactionObject<string>;
-
-    mint(to: string): NonPayableTransactionObject<string>;
-
-    name(): NonPayableTransactionObject<string>;
-
-    nonces(arg0: string): NonPayableTransactionObject<string>;
-
-    permit(
-      owner: string,
-      spender: string,
-      value: number | string | BN,
-      deadline: number | string | BN,
-      v: number | string | BN,
-      r: string | number[],
-      s: string | number[]
-    ): NonPayableTransactionObject<void>;
-
-    price0CumulativeLast(): NonPayableTransactionObject<string>;
-
-    price1CumulativeLast(): NonPayableTransactionObject<string>;
-
-    skim(to: string): NonPayableTransactionObject<void>;
-
-    swap(
-      amount0Out: number | string | BN,
-      amount1Out: number | string | BN,
-      to: string,
-      data: string | number[]
-    ): NonPayableTransactionObject<void>;
-
-    symbol(): NonPayableTransactionObject<string>;
-
-    sync(): NonPayableTransactionObject<void>;
-
-    token0(): NonPayableTransactionObject<string>;
-
-    token1(): NonPayableTransactionObject<string>;
-
-    totalSupply(): NonPayableTransactionObject<string>;
 
     transfer(
       to: string,
@@ -177,6 +114,69 @@ export interface SwapPair extends BaseContract {
       to: string,
       value: number | string | BN
     ): NonPayableTransactionObject<boolean>;
+
+    DOMAIN_SEPARATOR(): NonPayableTransactionObject<string>;
+
+    PERMIT_TYPEHASH(): NonPayableTransactionObject<string>;
+
+    nonces(owner: string): NonPayableTransactionObject<string>;
+
+    permit(
+      owner: string,
+      spender: string,
+      value: number | string | BN,
+      deadline: number | string | BN,
+      v: number | string | BN,
+      r: string | number[],
+      s: string | number[]
+    ): NonPayableTransactionObject<void>;
+
+    MINIMUM_LIQUIDITY(): NonPayableTransactionObject<string>;
+
+    factory(): NonPayableTransactionObject<string>;
+
+    token0(): NonPayableTransactionObject<string>;
+
+    token1(): NonPayableTransactionObject<string>;
+
+    getReserves(): NonPayableTransactionObject<{
+      reserve0: string;
+      reserve1: string;
+      blockTimestampLast: string;
+      0: string;
+      1: string;
+      2: string;
+    }>;
+
+    price0CumulativeLast(): NonPayableTransactionObject<string>;
+
+    price1CumulativeLast(): NonPayableTransactionObject<string>;
+
+    kLast(): NonPayableTransactionObject<string>;
+
+    mint(to: string): NonPayableTransactionObject<string>;
+
+    burn(
+      to: string
+    ): NonPayableTransactionObject<{
+      amount0: string;
+      amount1: string;
+      0: string;
+      1: string;
+    }>;
+
+    swap(
+      amount0Out: number | string | BN,
+      amount1Out: number | string | BN,
+      to: string,
+      data: string | number[]
+    ): NonPayableTransactionObject<void>;
+
+    skim(to: string): NonPayableTransactionObject<void>;
+
+    sync(): NonPayableTransactionObject<void>;
+
+    initialize(arg0: string, arg1: string): NonPayableTransactionObject<void>;
   };
   events: {
     Approval(cb?: Callback<Approval>): EventEmitter;

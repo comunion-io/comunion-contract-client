@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IProposal } from './interfaces/proposal.interface';
+import { IErc20 } from './interfaces/erc20.interface';
 
 @Injectable()
 export class BackendService {
@@ -37,13 +38,31 @@ export class BackendService {
     }
   }
 
-  public async test() {
-    console.log(
-      await this._request({
-        path: '/cores/discos',
-        method: 'get',
-      }),
-    );
+  // public async test() {
+  //   console.log(
+  //     await this._request({
+  //       path: '/cores/discos',
+  //       method: 'get',
+  //     }),
+  //   );
+  // }
+
+  public async createSwapPair(
+    txId: string,
+    pairAddress: string,
+    token0: IErc20,
+    token1: IErc20,
+  ) {
+    return await this._request({
+      path: '/cores/swap/pairs',
+      method: 'post',
+      data: {
+        txId,
+        pairAddress,
+        token0,
+        token1,
+      },
+    });
   }
 
   public async createProposal(proposal: IProposal) {

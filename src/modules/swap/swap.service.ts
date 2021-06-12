@@ -18,6 +18,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Transaction } from './entities/transaction.entity';
 import { Web3Service } from '../web3/web3.service';
+import { BackendService } from '../backend/backend.service';
+import { Erc20Service } from '../erc20/erc20.service';
 
 @Injectable()
 export class SwapService {
@@ -26,6 +28,8 @@ export class SwapService {
     @InjectRepository(Transaction)
     private readonly transactionRepository: Repository<Transaction>,
     private readonly web3Service: Web3Service,
+    private readonly backendService: BackendService,
+    private readonly erc20Service: Erc20Service,
   ) {}
 
   private swapFactoryContract: SwapFactoryContractContext;
@@ -36,13 +40,17 @@ export class SwapService {
     // console.log(await this.transactionRepository.find());
 
     // 订阅Swap工厂
-    // this.subscribeSwapFactoryContract();
+    this.subscribeSwapFactoryContract();
 
     // 获取所有的交易对合约地址
-    // const swapPairsAddress = await this.getAllSwapPairsAddress();
+    const swapPairsAddresses = await this.getAllSwapPairsAddress();
 
     // 订阅所有的交易对合约
-    // this.subscribeSwapPairContracts(swapPairsAddress);
+
+    // console.log(swapPairsAddresses);
+    for (const swapPairsAddress of swapPairsAddresses) {
+      this.subscribeSwapPairContract(swapPairsAddress);
+    }
   }
 
   // 初始化
@@ -58,7 +66,7 @@ export class SwapService {
   }
 
   private async subscribeSwapFactoryContract() {
-    this.swapFactoryContract.events.PairCreated({}).on('data', (data) => {
+    this.swapFactoryContract.events.PairCreated({}).on('data', async (data) => {
       this.handleSwapFactoryPairCreatedEvent(data);
     });
   }
@@ -67,11 +75,8 @@ export class SwapService {
     const allPairLength = Number(
       await this.swapFactoryContract.methods.allPairsLength().call(),
     );
-
     // 开发用，只取前几个
     // const allPairLength = 1;
-
-    console.log(allPairLength, 'allPairLength');
 
     const list: Promise<string>[] = [];
     for (let i = 0; i < allPairLength; i += 1) {
@@ -80,32 +85,41 @@ export class SwapService {
     return await Promise.all(list);
   }
 
-  private async subscribeSwapPairContracts(addresses: string[]): Promise<void> {
-    for (const address of addresses) {
-      const swapPairContract = this.web3Service.generateContractClient<SwapPairContractContext>(
-        SwapPairAbi as AbiItem[],
-        // 主网Uniswap合约：0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc
-        address,
-      );
-      swapPairContract.events.Swap({}).on('data', (data) => {
-        this.handleSwapPairSwapEvent(data);
-      });
-      swapPairContract.events.Sync({}).on('data', (data) => {
-        this.handleSwapPairSyncEvent(data);
-      });
-      swapPairContract.events.Mint({}).on('data', (data) => {
-        this.handleSwapPairMintEvent(data);
-      });
-      swapPairContract.events.Burn({}).on('data', (data) => {
-        this.handleSwapPairBurnEvent(data);
-      });
-    }
+  private async subscribeSwapPairContract(address: string): Promise<void> {
+    const swapPairContract = this.web3Service.generateContractClient<SwapPairContractContext>(
+      SwapPairAbi as AbiItem[],
+      // 主网Uniswap合约：0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc
+      address,
+    );
+    swapPairContract.events.Swap({}).on('data', (data) => {
+      this.handleSwapPairSwapEvent(data);
+    });
+    swapPairContract.events.Sync({}).on('data', (data) => {
+      this.handleSwapPairSyncEvent(data);
+    });
+    swapPairContract.events.Mint({}).on('data', (data) => {
+      this.handleSwapPairMintEvent(data);
+    });
+    swapPairContract.events.Burn({}).on('data', (data) => {
+      this.handleSwapPairBurnEvent(data);
+    });
   }
 
   private async handleSwapFactoryPairCreatedEvent(
     data: PairCreated,
   ): Promise<void> {
     console.log('handleSwapFactoryPairCreatedEvent', data);
+    this.subscribeSwapPairContract(data.returnValues.pair);
+    const [token0, token1] = await Promise.all([
+      this.erc20Service.getInfo(data.returnValues.token0),
+      this.erc20Service.getInfo(data.returnValues.token1),
+    ]);
+    await this.backendService.createSwapPair(
+      data.transactionHash,
+      data.returnValues.pair,
+      token0,
+      token1,
+    );
   }
 
   private async handleSwapPairSwapEvent(data: Swap): Promise<void> {

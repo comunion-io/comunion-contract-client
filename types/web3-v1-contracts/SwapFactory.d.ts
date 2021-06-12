@@ -39,6 +39,15 @@ export interface SwapFactory extends BaseContract {
   ): SwapFactory;
   clone(): SwapFactory;
   methods: {
+    feeTo(): NonPayableTransactionObject<string>;
+
+    feeToSetter(): NonPayableTransactionObject<string>;
+
+    getPair(
+      tokenA: string,
+      tokenB: string
+    ): NonPayableTransactionObject<string>;
+
     allPairs(arg0: number | string | BN): NonPayableTransactionObject<string>;
 
     allPairsLength(): NonPayableTransactionObject<string>;
@@ -48,15 +57,9 @@ export interface SwapFactory extends BaseContract {
       tokenB: string
     ): NonPayableTransactionObject<string>;
 
-    feeTo(): NonPayableTransactionObject<string>;
+    setFeeTo(arg0: string): NonPayableTransactionObject<void>;
 
-    feeToSetter(): NonPayableTransactionObject<string>;
-
-    getPair(arg0: string, arg1: string): NonPayableTransactionObject<string>;
-
-    setFeeTo(_feeTo: string): NonPayableTransactionObject<void>;
-
-    setFeeToSetter(_feeToSetter: string): NonPayableTransactionObject<void>;
+    setFeeToSetter(arg0: string): NonPayableTransactionObject<void>;
   };
   events: {
     PairCreated(cb?: Callback<PairCreated>): EventEmitter;
