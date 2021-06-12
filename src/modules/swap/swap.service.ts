@@ -45,9 +45,8 @@ export class SwapService {
     // 获取所有的交易对合约地址
     const swapPairsAddresses = await this.getAllSwapPairsAddress();
 
-    // 订阅所有的交易对合约
-
     // console.log(swapPairsAddresses);
+    // 订阅所有的交易对合约
     for (const swapPairsAddress of swapPairsAddresses) {
       this.subscribeSwapPairContract(swapPairsAddress);
     }

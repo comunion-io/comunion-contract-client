@@ -72,4 +72,21 @@ export class BackendService {
       data: proposal,
     });
   }
+
+  public async voteProposal(
+    proposalId: string,
+    vote: {
+      txId: string;
+      amount: number;
+      isApproved: boolean;
+      walletAddr: string;
+      createdAt: string;
+    },
+  ) {
+    return await this._request({
+      path: `/cores/proposal/${proposalId}vote`,
+      method: 'post',
+      data: vote,
+    });
+  }
 }

@@ -4,14 +4,21 @@ import { AbiItem } from 'web3-utils';
 import {
   accepted,
   Proposal as ProposalContractContext,
+  voted,
 } from '../../../types/web3-v1-contracts/Proposal';
 import proposalAbi = require('../../../abis/Proposal.json');
 import { Web3Service } from '../web3/web3.service';
 import { BackendService } from '../backend/backend.service';
+import dayjs = require('dayjs');
+import { Proposal } from './entities/proposal.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { LessThanOrEqual, Repository } from 'typeorm';
 
 @Injectable()
 export class ProposalService {
   constructor(
+    @InjectRepository(Proposal)
+    private readonly proposalRepository: Repository<Proposal>,
     private readonly configServise: ConfigService,
     private readonly web3Service: Web3Service,
     private readonly backendService: BackendService,
@@ -48,6 +55,28 @@ export class ProposalService {
         console.log(`[SubscribtionProposalAccepted] error`);
         console.error(error);
       });
+
+    this.proposalContract.events
+      .voted({})
+      .on('data', (data) => {
+        this.handleProposalVotedEvent(data);
+      })
+      .on('error', (error) => {
+        console.log(`[SubscribtionProposalVoted] error`);
+        console.error(error);
+      });
+  }
+
+  // 处理投票事件
+  private async handleProposalVotedEvent(data: voted): Promise<void> {
+    console.log(`${JSON.stringify(data)}`);
+    this.backendService.voteProposal(data.returnValues.v[0], {
+      txId: data.transactionHash,
+      amount: Number(data.returnValues.v[3]) || Number(data.returnValues.v[4]),
+      isApproved: Number(data.returnValues.v[3]) > 0,
+      walletAddr: data.returnValues.v[2],
+      createdAt: dayjs(Number(data.returnValues.v[5])).toString(),
+    });
   }
 
   // 处理提案接受事件
@@ -83,5 +112,57 @@ export class ProposalService {
         content: term[2],
       })),
     });
+  }
+
+  private async finishProposal(
+    id: string,
+    startId: string,
+    nonceInput?: number,
+    gasInput?: number,
+  ): Promise<void> {
+    let nonce: number;
+    let gas: number;
+    try {
+      const from = this.proposalContract.defaultAccount;
+      nonce =
+        nonceInput ??
+        (await this.web3Service.client.eth.getTransactionCount(from));
+
+      gas =
+        gasInput ??
+        (await this.proposalContract.methods
+          .releaseProposal(startId, id)
+          .estimateGas());
+
+      await this.proposalContract.methods.releaseProposal(startId, id).send({
+        from,
+        gas,
+        nonce,
+      });
+      console.log(`[FinishDisco] transcation sent, nonce ${nonce}, gas ${gas}`);
+    } catch (error) {
+      console.error(`[FinishDisco] error ${id}: ${error.message}`);
+      if (error.message === 'Returned error: nonce too low') {
+        this.finishProposal(id, startId, nonce + 1, gas);
+      }
+    }
+  }
+
+  public async finishProposals() {
+    const proposals = await this.proposalRepository.find({
+      select: ['id', 'startupId', 'duration', 'createdAt'],
+      where: {
+        // processing
+        status: 2,
+        createdAt: LessThanOrEqual(new Date()),
+      },
+    });
+    await Promise.all(
+      proposals
+        .filter(({ duration, createdAt }) =>
+          dayjs(createdAt).add(duration, 'day').isBefore(dayjs()),
+        )
+        .map(({ id, startupId }) => this.finishProposal(id, startupId)),
+    );
   }
 }
