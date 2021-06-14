@@ -96,7 +96,9 @@ export class ProposalService {
       description: data.returnValues.proposal[6],
       voterType: Number(data.returnValues.proposal[8][0]),
       supporters: Number(data.returnValues.proposal[9][0]),
-      minApprovalPercent: Number(data.returnValues.proposal[9][1]),
+      minApprovalPercent: Math.round(
+        Number(data.returnValues.proposal[9][1]) * 100,
+      ),
       duration: Math.round(Number(data.returnValues.proposal[9][2]) / 24),
       // 总支付金额大于 0 是有支付
       hasPayment: Number(data.returnValues.proposal[7][5]) > 0,
