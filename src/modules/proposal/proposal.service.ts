@@ -82,13 +82,17 @@ export class ProposalService {
   // 处理提案接受事件
   private async handleProposalAcceptedEvent(data: accepted): Promise<void> {
     console.log(`${JSON.stringify(data)}`);
+    // 总支付金额大于 0 是有支付
+    const hasPayment = Number(data.returnValues.proposal[7][5]) > 0;
     await this.backendService.createProposal({
       id: data.returnValues.proposal[1],
       txId: data.transactionHash,
       startupId: data.returnValues.proposal[0],
-      walletAddr: data.returnValues.proposal[7][0],
+      walletAddr: data.returnValues.proposal[11].toLowerCase(),
       // TODO 目前合约实现每一个 proposal 不是单独合约
-      contractAddr: this.configServise.get<string>('PROPOSAL_CONTRACT_ADDRESS'),
+      contractAddr: this.configServise
+        .get<string>('PROPOSAL_CONTRACT_ADDRESS')
+        .toLowerCase(),
       status: parseInt(data.returnValues.proposal[3], 10),
       title: data.returnValues.proposal[2],
       type: parseInt(data.returnValues.proposal[4], 10) + 1,
@@ -100,15 +104,26 @@ export class ProposalService {
         Number(data.returnValues.proposal[9][1]) * 100,
       ),
       duration: Math.round(Number(data.returnValues.proposal[9][2]) / 24),
-      // 总支付金额大于 0 是有支付
-      hasPayment: Number(data.returnValues.proposal[7][5]) > 0,
-      paymentAddr: data.returnValues.proposal[11],
-      paymentType: Number(data.returnValues.proposal[7][1]) === 1 ? 1 : 2,
-      paymentMonths: Number(data.returnValues.proposal[7][2]),
+      hasPayment,
+      paymentAddr: hasPayment
+        ? data.returnValues.proposal[7][0].toLowerCase()
+        : undefined,
+      paymentType: hasPayment
+        ? Number(data.returnValues.proposal[7][1]) === 1
+          ? 1
+          : 2
+        : undefined,
+      paymentMonths: hasPayment
+        ? Number(data.returnValues.proposal[7][2])
+        : undefined,
       // TODO 格式不确定。。。
-      paymentDate: data.returnValues.proposal[7][3],
-      paymentAmount: Number(data.returnValues.proposal[7][5]),
-      totalPaymentAmount: Number(data.returnValues.proposal[7][6]),
+      paymentDate: hasPayment ? data.returnValues.proposal[7][3] : undefined,
+      paymentAmount: hasPayment
+        ? Number(data.returnValues.proposal[7][5])
+        : undefined,
+      totalPaymentAmount: hasPayment
+        ? Number(data.returnValues.proposal[7][6])
+        : undefined,
       terms: data.returnValues.paymentDetails.map((term) => ({
         amount: Number(term[1]),
         content: term[2],
