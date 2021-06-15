@@ -20,9 +20,12 @@ import { Transaction } from './entities/transaction.entity';
 import { Web3Service } from '../web3/web3.service';
 import { BackendService } from '../backend/backend.service';
 import { Erc20Service } from '../erc20/erc20.service';
+import dayjs = require('dayjs');
 
 @Injectable()
 export class SwapService {
+  private WETH: string;
+
   constructor(
     private readonly configServise: ConfigService,
     @InjectRepository(Transaction)
@@ -30,7 +33,9 @@ export class SwapService {
     private readonly web3Service: Web3Service,
     private readonly backendService: BackendService,
     private readonly erc20Service: Erc20Service,
-  ) {}
+  ) {
+    this.WETH = this.configServise.get<string>('WETH_ADDRESS').toLowerCase();
+  }
 
   private swapFactoryContract: SwapFactoryContractContext;
 
@@ -90,17 +95,20 @@ export class SwapService {
       // 主网Uniswap合约：0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc
       address,
     );
+    const isReverse =
+      (await swapPairContract.methods.token0().call()).toLowerCase() ===
+      this.WETH;
     swapPairContract.events.Swap({}).on('data', (data) => {
-      this.handleSwapPairSwapEvent(data);
+      this.handleSwapPairSwapEvent(data, isReverse);
     });
     swapPairContract.events.Sync({}).on('data', (data) => {
-      this.handleSwapPairSyncEvent(data);
+      this.handleSwapPairSyncEvent(data, isReverse);
     });
     swapPairContract.events.Mint({}).on('data', (data) => {
-      this.handleSwapPairMintEvent(data);
+      this.handleSwapPairMintEvent(data, isReverse);
     });
     swapPairContract.events.Burn({}).on('data', (data) => {
-      this.handleSwapPairBurnEvent(data);
+      this.handleSwapPairBurnEvent(data, isReverse);
     });
   }
 
@@ -108,32 +116,78 @@ export class SwapService {
     data: PairCreated,
   ): Promise<void> {
     console.log('handleSwapFactoryPairCreatedEvent', data);
-    this.subscribeSwapPairContract(data.returnValues.pair);
     const [token0, token1] = await Promise.all([
       this.erc20Service.getInfo(data.returnValues.token0),
       this.erc20Service.getInfo(data.returnValues.token1),
     ]);
+    const isReverse = token0.address.toLowerCase() === this.WETH;
     await this.backendService.createSwapPair(
       data.transactionHash,
       data.returnValues.pair,
-      token0,
-      token1,
+      isReverse ? token1 : token0,
+      isReverse ? token0 : token1,
     );
   }
 
-  private async handleSwapPairSwapEvent(data: Swap): Promise<void> {
-    console.log('handleSwapPairSwapEvent', data);
+  private async handleSwapPairSwapEvent(
+    data: Swap,
+    isReverse: boolean,
+  ): Promise<void> {
+    console.log('handleSwapPairSwapEvent', data, isReverse);
+    await this.backendService.swapSwapPair(
+      data.transactionHash,
+      data.address,
+      data.returnValues.sender,
+      isReverse ? data.returnValues.amount1In : data.returnValues.amount0In,
+      isReverse ? data.returnValues.amount0In : data.returnValues.amount1In,
+      isReverse ? data.returnValues.amount1Out : data.returnValues.amount0Out,
+      isReverse ? data.returnValues.amount0Out : data.returnValues.amount1Out,
+      data.returnValues.to,
+      dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    );
   }
 
-  private async handleSwapPairSyncEvent(data: Sync): Promise<void> {
-    console.log('handleSwapPairSyncEvent', data);
+  private async handleSwapPairSyncEvent(
+    data: Sync,
+    isReverse: boolean,
+  ): Promise<void> {
+    console.log('handleSwapPairSyncEvent', data, isReverse);
+    await this.backendService.syncSwapPair(
+      data.address,
+      isReverse ? data.returnValues.reserve1 : data.returnValues.reserve0,
+      isReverse ? data.returnValues.reserve0 : data.returnValues.reserve1,
+      dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    );
   }
 
-  private async handleSwapPairMintEvent(data: Mint): Promise<void> {
-    console.log('handleSwapPairMintEvent', data);
+  private async handleSwapPairMintEvent(
+    data: Mint,
+    isReverse: boolean,
+  ): Promise<void> {
+    console.log('handleSwapPairMintEvent', data, isReverse);
+    await this.backendService.mintSwapPair(
+      data.transactionHash,
+      data.address,
+      data.returnValues.sender,
+      isReverse ? data.returnValues.amount1 : data.returnValues.amount0,
+      isReverse ? data.returnValues.amount0 : data.returnValues.amount1,
+      dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    );
   }
 
-  private async handleSwapPairBurnEvent(data: Burn) {
-    console.log('handleSwapPairBurnEvent', data);
+  private async handleSwapPairBurnEvent(
+    data: Burn,
+    isReverse: boolean,
+  ): Promise<void> {
+    console.log('handleSwapPairBurnEvent', data, isReverse);
+    await this.backendService.burnSwapPair(
+      data.transactionHash,
+      data.address,
+      data.returnValues.sender,
+      isReverse ? data.returnValues.amount1 : data.returnValues.amount0,
+      isReverse ? data.returnValues.amount0 : data.returnValues.amount1,
+      data.returnValues.to,
+      dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    );
   }
 }

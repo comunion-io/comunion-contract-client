@@ -65,6 +65,97 @@ export class BackendService {
     });
   }
 
+  public async mintSwapPair(
+    txId: string,
+    pairAddress: string,
+    sender: string,
+    amount0: string,
+    amount1: string,
+    occuredAt: string,
+  ) {
+    return await this._request({
+      path: '/cores/swap/mints',
+      method: 'post',
+      data: {
+        txId,
+        pairAddress,
+        sender,
+        amount0,
+        amount1,
+        occuredAt,
+      },
+    });
+  }
+
+  public async burnSwapPair(
+    txId: string,
+    pairAddress: string,
+    sender: string,
+    amount0: string,
+    amount1: string,
+    to: string,
+    occuredAt: string,
+  ) {
+    return await this._request({
+      path: '/cores/swap/burns',
+      method: 'post',
+      data: {
+        txId,
+        pairAddress,
+        sender,
+        amount0,
+        amount1,
+        occuredAt,
+      },
+    });
+  }
+
+  public async swapSwapPair(
+    txId: string,
+    pairAddress: string,
+    sender: string,
+    amount0In: string,
+    amount1In: string,
+    amount0Out: string,
+    amount1Out: string,
+    to: string,
+    occuredAt: string,
+  ) {
+    return await this._request({
+      path: '/cores/swap/swaps',
+      method: 'post',
+      data: {
+        txId,
+        pairAddress,
+        sender,
+        amount0In,
+        amount1In,
+        amount0Out,
+        amount1Out,
+        to,
+        occuredAt,
+      },
+    });
+  }
+
+  public async syncSwapPair(
+    pairAddress: string,
+    reserve0: string,
+    reserve1: string,
+    occuredAt: string,
+  ) {
+    return await this._request({
+      path: '/cores/swap/syncs',
+      method: 'post',
+      data: {
+        pairAddress,
+        reserve0,
+        reserve1,
+        occuredAt,
+      },
+    });
+  }
+
   public async createProposal(proposal: IProposal) {
     return await this._request({
       path: '/cores/proposals',
