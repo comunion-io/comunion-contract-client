@@ -25,6 +25,16 @@ export class ProposalService {
   ) {}
 
   private proposalContract: ProposalContractContext;
+  private readonly contractStatusMap = {
+    // Voting
+    0: 2,
+    // Pass
+    1: 6,
+    // Defeated
+    2: 5,
+    // Invalid
+    3: 4,
+  };
 
   async onModuleInit() {
     this.init();
@@ -93,9 +103,9 @@ export class ProposalService {
       contractAddr: this.configServise
         .get<string>('PROPOSAL_CONTRACT_ADDRESS')
         .toLowerCase(),
-      status: parseInt(data.returnValues.proposal[3], 10),
+      status: this.contractStatusMap[data.returnValues.proposal[3]],
       title: data.returnValues.proposal[2],
-      type: parseInt(data.returnValues.proposal[4], 10) + 1,
+      type: Number(data.returnValues.proposal[4]) + 1,
       contact: data.returnValues.proposal[5],
       description: data.returnValues.proposal[6],
       voterType: Number(data.returnValues.proposal[8][0]),
