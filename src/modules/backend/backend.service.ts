@@ -15,7 +15,7 @@ export class BackendService {
     data,
   }: {
     path: string;
-    method: 'post' | 'get';
+    method: 'post' | 'get' | 'put';
     params?: Record<string, any>;
     data?: Record<string, any>;
   }) {
@@ -175,9 +175,19 @@ export class BackendService {
     },
   ) {
     return await this._request({
-      path: `/cores/proposal/${proposalId}vote`,
+      path: `/cores/proposal/${proposalId}/vote`,
       method: 'post',
       data: vote,
+    });
+  }
+
+  public async statusChangeProposal(proposalId: string, status: number) {
+    return await this._request({
+      path: `/cores/proposal/${proposalId}`,
+      method: 'put',
+      data: {
+        status,
+      },
     });
   }
 }

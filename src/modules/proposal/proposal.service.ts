@@ -4,6 +4,7 @@ import { AbiItem } from 'web3-utils';
 import {
   accepted,
   Proposal as ProposalContractContext,
+  statusChanged,
   voted,
 } from '../../../types/web3-v1-contracts/Proposal';
 import proposalAbi = require('../../../abis/Proposal.json');
@@ -75,6 +76,16 @@ export class ProposalService {
         console.log(`[SubscribtionProposalVoted] error`);
         console.error(error);
       });
+
+    this.proposalContract.events
+      .statusChanged({})
+      .on('data', (data) => {
+        this.handleProposalStatusChangedEvent(data);
+      })
+      .on('error', (error) => {
+        console.log(`[SubscribtionProposalStatusChanged] error`);
+        console.error(error);
+      });
   }
 
   // 处理投票事件
@@ -87,6 +98,17 @@ export class ProposalService {
       walletAddr: data.returnValues.v[2],
       createdAt: dayjs(Number(data.returnValues.v[5])).toString(),
     });
+  }
+
+  // 处理状态变化事件
+  private async handleProposalStatusChangedEvent(
+    data: statusChanged,
+  ): Promise<void> {
+    console.log(`${JSON.stringify(data)}`);
+    this.backendService.statusChangeProposal(
+      data.returnValues.id,
+      this.contractStatusMap[data.returnValues.target],
+    );
   }
 
   // 处理提案接受事件
