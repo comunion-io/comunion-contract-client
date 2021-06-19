@@ -24,7 +24,7 @@ export class Erc20Service {
       name,
       symbol,
       decimals: Number(decimals),
-      address,
+      address: address.toLowerCase(),
     };
   }
 }

@@ -95,21 +95,24 @@ export class SwapService {
       // 主网Uniswap合约：0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc
       address,
     );
+
     const isReverse =
       (await swapPairContract.methods.token0().call()).toLowerCase() ===
       this.WETH;
+
     swapPairContract.events.Swap({}).on('data', (data) => {
       this.handleSwapPairSwapEvent(data, isReverse);
     });
     swapPairContract.events.Sync({}).on('data', (data) => {
       this.handleSwapPairSyncEvent(data, isReverse);
     });
-    swapPairContract.events.Mint({}).on('data', (data) => {
-      this.handleSwapPairMintEvent(data, isReverse);
-    });
-    swapPairContract.events.Burn({}).on('data', (data) => {
-      this.handleSwapPairBurnEvent(data, isReverse);
-    });
+    // Sync 已经覆盖以下事件
+    // swapPairContract.events.Mint({}).on('data', (data) => {
+    //   this.handleSwapPairMintEvent(data, isReverse);
+    // });
+    // swapPairContract.events.Burn({}).on('data', (data) => {
+    //   this.handleSwapPairBurnEvent(data, isReverse);
+    // });
   }
 
   private async handleSwapFactoryPairCreatedEvent(
@@ -120,10 +123,10 @@ export class SwapService {
       this.erc20Service.getInfo(data.returnValues.token0),
       this.erc20Service.getInfo(data.returnValues.token1),
     ]);
-    const isReverse = token0.address.toLowerCase() === this.WETH;
+    const isReverse = token0.address.toLowerCase() === this.WETH.toLowerCase();
     await this.backendService.createSwapPair(
       data.transactionHash,
-      data.returnValues.pair,
+      data.returnValues.pair.toLowerCase(),
       isReverse ? token1 : token0,
       isReverse ? token0 : token1,
     );
@@ -136,7 +139,7 @@ export class SwapService {
     console.log('handleSwapPairSwapEvent', data, isReverse);
     await this.backendService.swapSwapPair(
       data.transactionHash,
-      data.address,
+      data.address.toLowerCase(),
       data.returnValues.sender,
       isReverse ? data.returnValues.amount1In : data.returnValues.amount0In,
       isReverse ? data.returnValues.amount0In : data.returnValues.amount1In,
@@ -153,7 +156,7 @@ export class SwapService {
   ): Promise<void> {
     console.log('handleSwapPairSyncEvent', data, isReverse);
     await this.backendService.syncSwapPair(
-      data.address,
+      data.address.toLowerCase(),
       isReverse ? data.returnValues.reserve1 : data.returnValues.reserve0,
       isReverse ? data.returnValues.reserve0 : data.returnValues.reserve1,
       dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -167,7 +170,7 @@ export class SwapService {
     console.log('handleSwapPairMintEvent', data, isReverse);
     await this.backendService.mintSwapPair(
       data.transactionHash,
-      data.address,
+      data.address.toLowerCase(),
       data.returnValues.sender,
       isReverse ? data.returnValues.amount1 : data.returnValues.amount0,
       isReverse ? data.returnValues.amount0 : data.returnValues.amount1,
@@ -182,7 +185,7 @@ export class SwapService {
     console.log('handleSwapPairBurnEvent', data, isReverse);
     await this.backendService.burnSwapPair(
       data.transactionHash,
-      data.address,
+      data.address.toLowerCase(),
       data.returnValues.sender,
       isReverse ? data.returnValues.amount1 : data.returnValues.amount0,
       isReverse ? data.returnValues.amount0 : data.returnValues.amount1,
