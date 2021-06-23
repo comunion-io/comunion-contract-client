@@ -106,13 +106,12 @@ export class SwapService {
     swapPairContract.events.Sync({}).on('data', (data) => {
       this.handleSwapPairSyncEvent(data, isReverse);
     });
-    // Sync 已经覆盖以下事件
-    // swapPairContract.events.Mint({}).on('data', (data) => {
-    //   this.handleSwapPairMintEvent(data, isReverse);
-    // });
-    // swapPairContract.events.Burn({}).on('data', (data) => {
-    //   this.handleSwapPairBurnEvent(data, isReverse);
-    // });
+    swapPairContract.events.Mint({}).on('data', (data) => {
+      this.handleSwapPairMintEvent(data, isReverse);
+    });
+    swapPairContract.events.Burn({}).on('data', (data) => {
+      this.handleSwapPairBurnEvent(data, isReverse);
+    });
   }
 
   private async handleSwapFactoryPairCreatedEvent(
