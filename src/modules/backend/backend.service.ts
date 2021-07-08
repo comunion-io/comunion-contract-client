@@ -19,33 +19,31 @@ export class BackendService {
     params?: Record<string, any>;
     data?: Record<string, any>;
   }) {
+    const requestParmas = {
+      method,
+      baseURL: this.configServise.get<string>('BACKEND_HOST'),
+      headers: { Host: this.configServise.get<string>('BACKEND_DOMAIN') },
+      url: path,
+      params,
+      data,
+    };
     try {
-      const res = await axios({
-        method,
-        baseURL: this.configServise.get<string>('BACKEND_HOST'),
-        headers: { Host: this.configServise.get<string>('BACKEND_DOMAIN') },
-        url: path,
-        params,
-        data,
-      });
+      const res = await axios(requestParmas);
       if (res.status >= 200 && res.status < 400) {
+        console.log(
+          `[RequestBackend][INFO] ${JSON.stringify({
+            ...requestParmas,
+            res: res.data,
+          })}`,
+        );
         return res.data;
       }
-      throw new Error(`Rquest failed with ${res.status}`);
+      throw new Error(`Request failed with ${res.status}`);
     } catch (error) {
-      console.log(`[RequestBackend] error ${path}`);
+      console.log(`[RequestBackend][ERROR] ${JSON.stringify(requestParmas)}`);
       console.error(error);
     }
   }
-
-  // public async test() {
-  //   console.log(
-  //     await this._request({
-  //       path: '/cores/discos',
-  //       method: 'get',
-  //     }),
-  //   );
-  // }
 
   public async createSwapPair(
     txId: string,
