@@ -1,4 +1,5 @@
 import axios from 'axios';
+import * as https from 'https';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IProposal } from './interfaces/proposal.interface';
@@ -6,7 +7,15 @@ import { IErc20 } from './interfaces/erc20.interface';
 
 @Injectable()
 export class BackendService {
-  constructor(private readonly configServise: ConfigService) {}
+  private __axiosInstance;
+
+  constructor(private readonly configServise: ConfigService) {
+    this.__axiosInstance = axios.create({
+      httpsAgent: new https.Agent({
+        rejectUnauthorized: false,
+      }),
+    });
+  }
 
   private async _request({
     path,
@@ -28,7 +37,7 @@ export class BackendService {
       data,
     };
     try {
-      const res = await axios(requestParmas);
+      const res = await this.__axiosInstance(requestParmas);
       if (res.status >= 200 && res.status < 400) {
         console.log(
           `[RequestBackend][INFO] ${JSON.stringify({
