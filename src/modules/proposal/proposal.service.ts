@@ -151,10 +151,10 @@ export class ProposalService {
       // TODO 格式不确定。。。
       paymentDate: hasPayment ? data.returnValues.proposal[7][3] : undefined,
       paymentAmount: hasPayment
-        ? Number(data.returnValues.proposal[7][5])
+        ? Number(data.returnValues.proposal[7][4])
         : undefined,
       totalPaymentAmount: hasPayment
-        ? Number(data.returnValues.proposal[7][6])
+        ? Number(data.returnValues.proposal[7][5])
         : undefined,
       terms: data.returnValues.paymentDetails.map((term) => ({
         amount: Number(term[1]),
