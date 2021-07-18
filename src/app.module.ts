@@ -5,6 +5,7 @@ import { ScheduleModule } from 'nest-schedule';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { DiscoModule } from './modules/disco/disco.module';
 import { ProposalModule } from './modules/proposal/proposal.module';
+import { StartupModule } from './modules/startup/startup.module';
 import { SwapModule } from './modules/swap/swap.module';
 import { ScheduleService } from './schedule.service';
 
@@ -37,6 +38,7 @@ const ENV = process.env.NODE_ENV;
     DiscoModule,
     SwapModule,
     ProposalModule,
+    StartupModule,
   ],
   providers: [ScheduleService],
 })
